@@ -1,0 +1,33 @@
+version: '2'
+services:
+    nginx:
+        image: nginx:latest
+        ports:
+            - '80:80'
+        volumes:
+            - ./www/:/data/www
+            - ./nginx/conf.d:/etc/nginx/conf.d
+        links:
+            - php-fpm:fpm
+
+    php-fpm:
+        build: ./php
+        image: php-fpm
+        expose:
+            - "9000"
+        volumes:
+            - ./www:/data/www
+            - ./php/php/conf.d:/usr/local/etc/php/conf.d
+            - ./php/php/php.ini:/usr/local/etc/php/php.ini
+            # - ./php/php-fpm.d:/usr/local/etc/php-fpm.d
+        working_dir: /data/www
+        links:
+            - redis:redis
+
+    redis:
+        image: redis:latest
+        expose:
+            - "6379"
+        volumes:
+            - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+        command: redis-server /usr/local/etc/redis/redis.conf
